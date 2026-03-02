@@ -62,18 +62,13 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     background: #1a2744 !important;
     color: #d4a843 !important;
 }
-/* Sidebar delete × button */
-section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] [data-testid="column"]:first-child .stButton > button {
-    background: transparent !important;
-    border: none !important;
-    color: #6b7f99 !important;
-    font-size: 1.1rem !important;
-    padding: 4px !important;
-    min-height: 0 !important;
+/* Sidebar delete button - small and subtle */
+section[data-testid="stSidebar"] button[kind="secondary"]:has(+ div) {
+    font-size: 0.65rem !important;
 }
-section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] [data-testid="column"]:first-child .stButton > button:hover {
-    color: #ef4444 !important;
-    background: #ef444418 !important;
+/* Target delete buttons specifically by key pattern */
+section[data-testid="stSidebar"] .stButton > button {
+    font-size: 0.85rem !important;
 }
 
 /* Sidebar new-chat button override */
@@ -507,33 +502,33 @@ with st.sidebar:
         is_active = cid == st.session_state.active_conv
         wrapper_class = "conv-active" if is_active else ""
 
-        cols = st.columns([1, 8])
-        with cols[0]:
-            if st.button("×", key=f"del_{cid}"):
-                del st.session_state.conversations[cid]
-                if st.session_state.active_conv == cid:
-                    remaining = sorted(st.session_state.conversations.keys())
-                    if remaining:
-                        st.session_state.active_conv = remaining[-1]
-                    else:
-                        st.session_state.conv_counter += 1
-                        new_id = st.session_state.conv_counter
-                        st.session_state.active_conv = new_id
-                        st.session_state.conversations[new_id] = [
-                            {
-                                "role": "assistant",
-                                "content": "أهلاً بك في نظام المساعد الأكاديمي لجامعة العقبة للتكنولوجيا.\n\nيمكنني مساعدتك في:\n- معلومات المواد الدراسية والتخصصات\n- متطلبات التسجيل والقبول\n- الجداول الدراسية والأنظمة الأكاديمية\n- أي استفسار يتعلق بدراستك في الجامعة\n\nكيف أقدر أساعدك؟",
-                                "time": datetime.now().strftime("%H:%M"),
-                            }
-                        ]
-                st.rerun()
-        with cols[1]:
-            st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
-            badge_html = f'<span class="msg-count-badge">{msg_count}</span>'
-            if st.button(f"{label}", key=f"conv_{cid}", use_container_width=True):
-                st.session_state.active_conv = cid
-                st.rerun()
-            st.markdown(f'{badge_html}</div>', unsafe_allow_html=True)
+        # Conversation button with badge
+        st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
+        btn_label = f"{label}  ({msg_count})"
+        if st.button(btn_label, key=f"conv_{cid}", use_container_width=True):
+            st.session_state.active_conv = cid
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Delete button right under, small and aligned
+        if st.button("🗑 حذف", key=f"del_{cid}"):
+            del st.session_state.conversations[cid]
+            if st.session_state.active_conv == cid:
+                remaining = sorted(st.session_state.conversations.keys())
+                if remaining:
+                    st.session_state.active_conv = remaining[-1]
+                else:
+                    st.session_state.conv_counter += 1
+                    new_id = st.session_state.conv_counter
+                    st.session_state.active_conv = new_id
+                    st.session_state.conversations[new_id] = [
+                        {
+                            "role": "assistant",
+                            "content": "أهلاً بك في نظام المساعد الأكاديمي لجامعة العقبة للتكنولوجيا.\n\nيمكنني مساعدتك في:\n- معلومات المواد الدراسية والتخصصات\n- متطلبات التسجيل والقبول\n- الجداول الدراسية والأنظمة الأكاديمية\n- أي استفسار يتعلق بدراستك في الجامعة\n\nكيف أقدر أساعدك؟",
+                            "time": datetime.now().strftime("%H:%M"),
+                        }
+                    ]
+            st.rerun()
 
     # Clear conversation (no temperature slider)
     st.markdown("""
